@@ -59,9 +59,11 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
             Fragment fragment = new NoteFragment();
             Bundle args = new Bundle();
             args.putBoolean("isNew", false);
+            args.putInt("noteID", list.get(position).getID());
             fragment.setArguments(args);
             activity.getSupportFragmentManager().beginTransaction()
                     .replace(R.id.note_container, fragment)
+                    .addToBackStack(null)
                     .commit();
         });
     }

@@ -1,6 +1,7 @@
 package com.example.noteify.Note;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatButton;
@@ -21,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.noteify.Adapter.NoteAdapter;
 import com.example.noteify.Data.Note;
 import com.example.noteify.Database.NoteHelper;
+import com.example.noteify.MainActivity;
 import com.example.noteify.NoteActivity;
 import com.example.noteify.R;
 
@@ -51,6 +54,16 @@ public class ListFragment extends Fragment {
         if(preferences.getBoolean("userIsAdmin", false))
             note_all_users.setVisibility(View.VISIBLE);
 
+        ImageView exit_button = view.findViewById(R.id.note_exit);
+        exit_button.setOnClickListener(v -> {
+            getActivity().finish();
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt("userID", 0);
+            editor.putBoolean("userIsAdmin", false);
+            editor.commit();
+            startActivity(new Intent(getContext(), MainActivity.class));
+        });
+
 
         EditText search = view.findViewById(R.id.note_search);
         search.addTextChangedListener(new TextWatcher() {
@@ -62,10 +75,10 @@ public class ListFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {AccountParam param = new AccountParam(preferences.getBoolean("userIsAdmin", false), preferences.getInt("userID", 0), search.getText().toString());
                 AccountParam params = new AccountParam(preferences.getBoolean("userIsAdmin", false), preferences.getInt("userID", 0), search.getText().toString());
-                if(preferences.getBoolean("userIsAdmin", false))
-                    if(showingAll.get())
+                if(preferences.getBoolean("userIsAdmin", false)) {
+                    if (showingAll.get())
                         new initSearchListTask().execute(params);
-                else
+                }else
                     new initSearchTask().execute(params);
             }
 
@@ -108,6 +121,7 @@ public class ListFragment extends Fragment {
             fragment.setArguments(args);
             getActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.note_container, fragment)
+                    .addToBackStack(null)
                     .commit();
         });
     }

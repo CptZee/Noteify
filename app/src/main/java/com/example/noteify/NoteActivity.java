@@ -2,6 +2,7 @@ package com.example.noteify;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -17,5 +18,16 @@ public class NoteActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.note_container, new ListFragment())
                 .commit();
+    }
+    @Override
+    public void onBackPressed(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to close the application?")
+                .setPositiveButton("Yes", (dialog, id) -> {
+                    this.finish();
+                })
+                .setNegativeButton("No", (dialog, id) -> {
+
+                }).create().show();
     }
 }

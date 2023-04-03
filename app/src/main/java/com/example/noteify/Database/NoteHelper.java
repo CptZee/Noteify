@@ -65,8 +65,9 @@ public class NoteHelper extends SQLiteOpenHelper {
         try{
             Cursor cursor = db.rawQuery("SELECT ID, ownerID, title, text FROM " + TABLENAME + " WHERE ID = ?",
                     new String[]{String.valueOf(ID)});
-            while (cursor.moveToNext())
+            while (cursor.moveToNext()) {
                 data = prepareData(cursor);
+            };
         }catch (SQLiteException e){
             Log.e("DB_Helper", "Unable to retrieve data from the " + TABLENAME, e.getCause());
         }
@@ -121,7 +122,7 @@ public class NoteHelper extends SQLiteOpenHelper {
         if(data.getTitle() != null)
             content.put("title", data.getTitle());
         if (data.getText() != null)
-            content.put("text", data.getTitle());
+            content.put("text", data.getText());
         content.put("archived", 0);
         return content;
     }
