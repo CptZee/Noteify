@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +26,7 @@ import com.example.noteify.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ListFragment extends Fragment {
     public ListFragment() {
@@ -36,7 +38,7 @@ public class ListFragment extends Fragment {
     private SharedPreferences preferences;
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        boolean showingAll = false;
+        AtomicBoolean showingAll = new AtomicBoolean(false);
         list = view.findViewById(R.id.note_list);
         note_data_loader = view.findViewById(R.id.note_data_loader);
         note_all_users = view.findViewById(R.id.note_all_users);
@@ -60,8 +62,9 @@ public class ListFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {AccountParam param = new AccountParam(preferences.getBoolean("userIsAdmin", false), preferences.getInt("userID", 0), search.getText().toString());
                 AccountParam params = new AccountParam(preferences.getBoolean("userIsAdmin", false), preferences.getInt("userID", 0), search.getText().toString());
-                if(preferences.getBoolean("userIsAdmin", false) && showingAll)
-                    new initSearchListTask().execute(params);
+                if(preferences.getBoolean("userIsAdmin", false))
+                    if(showingAll.get())
+                        new initSearchListTask().execute(params);
                 else
                     new initSearchTask().execute(params);
             }
@@ -72,17 +75,29 @@ public class ListFragment extends Fragment {
             }
         });
 
+        AppCompatButton search_button = view.findViewById(R.id.button);
+        search_button.setOnClickListener(v->{
+            AccountParam params = new AccountParam(preferences.getBoolean("userIsAdmin", false), preferences.getInt("userID", 0), search.getText().toString());
+            if(preferences.getBoolean("userIsAdmin", false))
+                if(showingAll.get())
+                    new initSearchListTask().execute(params);
+                else
+                    new initSearchTask().execute(params);
+        });
+
         note_all.setTypeface(note_all.getTypeface(), Typeface.BOLD);
         note_all.setOnClickListener(v->{
             note_all.setTypeface(note_all.getTypeface(), Typeface.BOLD);
-            note_all_users.setTypeface(note_all.getTypeface(), Typeface.NORMAL);
+            note_all_users.setTypeface(null,Typeface.NORMAL);
             showForSingleUser();
+            showingAll.set(false);
         });
 
         note_all_users.setOnClickListener((v->{
             note_all_users.setTypeface(note_all.getTypeface(), Typeface.BOLD);
-            note_all.setTypeface(note_all.getTypeface(), Typeface.NORMAL);
+            note_all.setTypeface(null,Typeface.NORMAL);
             showForAllUsers();
+            showingAll.set(true);
         }));
 
         Button button = view.findViewById(R.id.note_add_button);
@@ -128,13 +143,9 @@ public class ListFragment extends Fragment {
             List<Note> list = new ArrayList<>();
             NoteHelper noteHelper = new NoteHelper(getContext());
             for(Note note: noteHelper.get()){
-                if(!isAdmin) {
                     if (note.getOwnerID() == ID)
                         if(note.getTitle().toLowerCase().contains(title.toLowerCase()))
                             list.add(note);
-                }else
-                    if(note.getTitle().toLowerCase().contains(title.toLowerCase()))
-                        list.add(note);
             }
 
             Log.i("ListAdapter", "List size is: " + list.size());
@@ -147,10 +158,12 @@ public class ListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Note> notes) {
             super.onPostExecute(notes);
-            if(notes.size() < 1)
+            if(notes.size() < 1) {
                 note_data_loader.setText("No notes found!");
+                note_data_loader.setVisibility(View.VISIBLE);
+            }
             else
-                note_data_loader.setVisibility(View.INVISIBLE);
+                note_data_loader.setVisibility(View.GONE);
             NoteAdapter adapter = new NoteAdapter(notes, (NoteActivity) getActivity());
             list.setAdapter(adapter);
         }
@@ -169,8 +182,7 @@ public class ListFragment extends Fragment {
                 if(!isAdmin) {
                     if (note.getOwnerID() == ID)
                         list.add(note);
-                }else
-                    list.add(note);
+                }
             }
 
             Log.i("ListAdapter", "List size is: " + list.size());
@@ -183,10 +195,12 @@ public class ListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Note> notes) {
             super.onPostExecute(notes);
-            if(notes.size() < 1)
+            if(notes.size() < 1) {
                 note_data_loader.setText("No notes found! Create one now!");
+                note_data_loader.setVisibility(View.VISIBLE);
+            }
             else
-                note_data_loader.setVisibility(View.INVISIBLE);
+                note_data_loader.setVisibility(View.GONE);
             NoteAdapter adapter = new NoteAdapter(notes, (NoteActivity) getActivity());
             list.setAdapter(adapter);
         }
@@ -213,10 +227,12 @@ public class ListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Note> notes) {
             super.onPostExecute(notes);
-            if(notes.size() < 1)
+            if(notes.size() < 1) {
                 note_data_loader.setText("No notes found! Create one now!");
+                note_data_loader.setVisibility(View.VISIBLE);
+            }
             else
-                note_data_loader.setVisibility(View.INVISIBLE);
+                note_data_loader.setVisibility(View.GONE);
             NoteAdapter adapter = new NoteAdapter(notes, (NoteActivity) getActivity());
             list.setAdapter(adapter);
         }
@@ -247,10 +263,12 @@ public class ListFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Note> notes) {
             super.onPostExecute(notes);
-            if(notes.size() < 1)
+            if(notes.size() < 1) {
                 note_data_loader.setText("No notes found!");
+                note_data_loader.setVisibility(View.VISIBLE);
+            }
             else
-                note_data_loader.setVisibility(View.INVISIBLE);
+                note_data_loader.setVisibility(View.GONE);
             NoteAdapter adapter = new NoteAdapter(notes, (NoteActivity) getActivity());
             list.setAdapter(adapter);
         }

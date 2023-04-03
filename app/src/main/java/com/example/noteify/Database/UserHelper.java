@@ -122,6 +122,7 @@ public class UserHelper extends SQLiteOpenHelper {
             data.setAdmin(true);
         else
             data.setAdmin(false);
+
         return data;
     }
 
