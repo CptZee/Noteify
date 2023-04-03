@@ -76,8 +76,9 @@ public class LoginFragment extends Fragment {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt("userID", user.getID());
                 editor.putBoolean("userIsAdmin", user.isAdmin());
+
+                Log.i("AdminHelper", "Current account is admin? " + user.getID());
                 editor.commit();
-                Log.i("AdminHelper", "Current account is admin? " + sharedPreferences.getBoolean("userIsAdmin", false));
                 startActivity(new Intent(getContext(), NoteActivity.class));
                 getActivity().finish();
                 return;
@@ -96,7 +97,7 @@ public class LoginFragment extends Fragment {
                 Log.i("AuthLogger", "Matching accounts...");
                 if(user.getUsername().equals(u.getUsername()) && user.getPassword().equals(u.getPassword())){
                     Log.i("AuthLogger", "Account match!");
-                    return user;
+                    return u;
                 }
             }
             Log.i("AuthLogger", "Account to parse is " + ID);
