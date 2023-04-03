@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -26,7 +27,7 @@ public class NoteFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         helper = new NoteHelper(getContext());
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Notify", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Noteify", Context.MODE_PRIVATE);
         int ID = sharedPreferences.getInt("userID", 0);
         boolean isNew = getArguments().getBoolean("isNew");
         int noteID = getArguments().getInt("noteID");
@@ -34,35 +35,49 @@ public class NoteFragment extends Fragment {
         body = view.findViewById(R.id.view_body);
         Button saveButton = view.findViewById(R.id.view_button);
         Button backButton = view.findViewById(R.id.view_back_button);
+
         backButton.setOnClickListener(v -> {
             getActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.note_container, new ListFragment())
                     .commit();
         });
+
         saveButton.setOnClickListener(v->{
             Note note = new Note();
             Log.i("NoteLogger", "Button was clicked!");
+            if(title.getEditText().getText().toString().isEmpty()){
+                title.setError("Tittle cannot be empty!");
+                return;
+            }
             if(isNew){
                 Log.i("NoteLogger", "Note is new");
                 note.setTitle(title.getEditText().getText().toString());
                 note.setText(body.getText().toString());
                 note.setOwnerID(ID);
                 helper.insert(note);
+                Toast.makeText(getContext(), "Successfully created a note entitled \"" + note.getTitle()  +"\"", Toast.LENGTH_SHORT).show();
             }else{
                 Log.i("NoteLogger", "Note is not new");
                 note.setID(noteID);
                 note.setTitle(title.getEditText().getText().toString());
                 note.setText(body.getText().toString());
                 helper.update(note);
+                Toast.makeText(getContext(), "Successfully updated the note entitled \"" + note.getTitle()  +"\"", Toast.LENGTH_SHORT).show();
             }
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.note_container, new ListFragment())
+                    .commit();
         });
+
+        if(!isNew)
+            new initModification().execute(noteID);
     }
     private class initModification extends AsyncTask<Integer, Void, Note>{
         @Override
         protected void onPostExecute(Note note) {
-            super.onPostExecute(note);
             title.getEditText().setText(note.getTitle());
-            body.setText(note.getTitle());
+            body.setText(note.getText());
+            super.onPostExecute(note);
         }
 
         @Override
